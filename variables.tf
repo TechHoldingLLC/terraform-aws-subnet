@@ -7,6 +7,12 @@ variable "availability_zones" {
   type        = list(any)
 }
 
+variable "create_acl" {
+  description = "Create ACL"
+  type        = bool
+  default     = false
+}
+
 variable "public_subnets" {
   description = "Public subnets config"
   type        = any
