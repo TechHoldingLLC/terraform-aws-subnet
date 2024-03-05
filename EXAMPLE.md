@@ -10,6 +10,26 @@ module "subnet" {
 }
 ```
 
+## Create private subnet with default nacl rule
+```
+module "private_subnet" {
+  source                  = "./subnet"
+  name                    = "my-project-private-subnet"
+  vpc_id                  = module.vpc.id
+  availability_zones      = module.vpc.availability_zones
+  private_route_table_ids = module.vpc.private_route_table_ids
+  private_subnets = [          # do not forget to update these values according to the need
+    {
+      network = "10.0"  
+      cidr_blocks = [    
+        "106.0/24",    
+        "107.0/24"
+      ]
+    }
+  ]
+}
+```
+
 ## Create a Private Subnet with custom name, vpc_id, availability_zones, private_route_table_ids, private_subnets values and nacl rules
 Note: Before creating this module, You need to create a VPC.  
 
@@ -19,6 +39,7 @@ module "private_subnet" {
   name               = "my-project-private-subnet"
   vpc_id             = module.vpc.id
   availability_zones = module.vpc.availability_zones
+  create_acl         = true
 
   # Private subnets
   private_route_table_ids = module.vpc.private_route_table_ids
@@ -61,7 +82,7 @@ module "private_subnet" {
 ```
 module "public_subnet" {
   source             = "../terraform-subnet"
-  name               = "my-project-public-subnet""
+  name               = "my-project-public-subnet"
   vpc_id             = module.vpc.id
   availability_zones = module.vpc.availability_zones
 
