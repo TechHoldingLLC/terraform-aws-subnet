@@ -10,7 +10,7 @@ locals {
     for subnet in var.public_subnets : [
       for index, cidr_block in subnet.cidr_blocks : {
         cidr_block        = "${subnet.network}.${cidr_block}"
-        availability_zone = var.availability_zones[ (index % length(var.var.availability_zones)) ]
+        availability_zone = var.availability_zones[ (index % length(var.availability_zones)) ]
       }
     ]
   ])
@@ -19,7 +19,7 @@ locals {
     for subnet in var.private_subnets : [
       for index, cidr_block in subnet.cidr_blocks : {
         cidr_block        = "${subnet.network}.${cidr_block}"
-        availability_zone = var.availability_zones[ (index % length(var.var.availability_zones)) ]
+        availability_zone = var.availability_zones[ (index % length(var.availability_zones)) ]
       }
     ]
   ])
