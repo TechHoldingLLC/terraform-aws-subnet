@@ -102,11 +102,11 @@ resource "aws_subnet" "private_subnet" {
   cidr_block        = each.value.cidr_block
   availability_zone = each.value.availability_zone
 
-  enable_dns64                                   = var.enable_ipv6
-  ipv6_cidr_block                                = each.value.ipv6_cidr_block
-  assign_ipv6_address_on_creation                = var.enable_ipv6
-  enable_resource_name_dns_a_record_on_launch    = var.enable_ipv6
-  enable_resource_name_dns_aaaa_record_on_launch = var.enable_ipv6
+  enable_dns64                                   = var.enable_ipv6 ? var.enable_dns64 : false
+  ipv6_cidr_block                                = var.enable_ipv6 ? each.value.ipv6_cidr_block : null
+  assign_ipv6_address_on_creation                = var.enable_ipv6 ? var.assign_ipv6_address_on_creation : false
+  enable_resource_name_dns_a_record_on_launch    = var.enable_ipv6 ? var.enable_resource_name_dns_a_record_on_launch : false
+  enable_resource_name_dns_aaaa_record_on_launch = var.enable_ipv6 ? var.enable_resource_name_dns_aaaa_record_on_launch : false
 
   map_public_ip_on_launch = lookup(each.value, "map_public_ip_on_launch", false)
   tags = merge(
