@@ -2,6 +2,12 @@
 #  subnet/variables.tf  #
 ##########################
 
+variable "assign_ipv6_address_on_creation" {
+  description = "Specifies whether to assign ipv6 address to resources in subnet on creation"
+  type        = bool
+  default     = false
+}
+
 variable "availability_zones" {
   description = "Number of availability zones for subnet deployment"
   type        = list(any)
@@ -9,6 +15,30 @@ variable "availability_zones" {
 
 variable "create_acl" {
   description = "Create ACL"
+  type        = bool
+  default     = false
+}
+
+variable "enable_dns64" {
+  description = "Specifies whether to enable DNS64"
+  type        = bool
+  default     = false
+}
+
+variable "enable_ipv6" {
+  description = "Specifies whether to enable IPv6"
+  type        = bool
+  default     = false
+}
+
+variable "enable_resource_name_dns_a_record_on_launch" {
+  description = "Specifies whether to respond to DNS queries for instance hostnames with DNS A records"
+  type        = bool
+  default     = false
+}
+
+variable "enable_resource_name_dns_aaaa_record_on_launch" {
+  description = "Specifies whether to respond to DNS queries for instance hostnames with DNS AAAA records"
   type        = bool
   default     = false
 }

@@ -10,7 +10,8 @@ locals {
     for subnet in var.public_subnets : [
       for index, cidr_block in subnet.cidr_blocks : {
         cidr_block        = "${subnet.network}.${cidr_block}"
-        availability_zone = var.availability_zones[index]
+        ipv6_cidr_block   = "${subnet.ipv6_network}${element(subnet.ipv6_cidr_blocks, index)}"
+        availability_zone = element(var.availability_zones, index)
       }
     ]
   ])
@@ -19,7 +20,8 @@ locals {
     for subnet in var.private_subnets : [
       for index, cidr_block in subnet.cidr_blocks : {
         cidr_block        = "${subnet.network}.${cidr_block}"
-        availability_zone = var.availability_zones[index]
+        ipv6_cidr_block   = "${subnet.ipv6_network}${element(subnet.ipv6_cidr_blocks, index)}"
+        availability_zone = element(var.availability_zones, index)
       }
     ]
   ])
@@ -64,10 +66,17 @@ locals {
 # Public Subnets
 #------------------------------------------------------------------------------------
 resource "aws_subnet" "public_subnet" {
-  for_each                = { for subnet in local.public_subnets : "${subnet.availability_zone}-${subnet.cidr_block}" => subnet }
-  vpc_id                  = var.vpc_id
-  cidr_block              = each.value.cidr_block
-  availability_zone       = each.value.availability_zone
+  for_each          = { for subnet in local.public_subnets : "${subnet.availability_zone}-${subnet.cidr_block}" => subnet }
+  vpc_id            = var.vpc_id
+  cidr_block        = each.value.cidr_block
+  availability_zone = each.value.availability_zone
+
+  enable_dns64                                   = var.enable_ipv6 ? var.enable_dns64 : false
+  ipv6_cidr_block                                = var.enable_ipv6 ? each.value.ipv6_cidr_block : null
+  assign_ipv6_address_on_creation                = var.enable_ipv6 ? var.assign_ipv6_address_on_creation : false
+  enable_resource_name_dns_a_record_on_launch    = var.enable_ipv6 ? var.enable_resource_name_dns_a_record_on_launch : false
+  enable_resource_name_dns_aaaa_record_on_launch = var.enable_ipv6 ? var.enable_resource_name_dns_aaaa_record_on_launch : false
+
   map_public_ip_on_launch = lookup(each.value, "map_public_ip_on_launch", true)
   tags = merge(
     {
@@ -88,10 +97,17 @@ resource "aws_route_table_association" "public_subnet" {
 # Private Subnets
 #------------------------------------------------------------------------------------
 resource "aws_subnet" "private_subnet" {
-  for_each                = { for subnet in local.private_subnets : "${subnet.availability_zone}-${subnet.cidr_block}" => subnet }
-  vpc_id                  = var.vpc_id
-  cidr_block              = each.value.cidr_block
-  availability_zone       = each.value.availability_zone
+  for_each          = { for subnet in local.private_subnets : "${subnet.availability_zone}-${subnet.cidr_block}" => subnet }
+  vpc_id            = var.vpc_id
+  cidr_block        = each.value.cidr_block
+  availability_zone = each.value.availability_zone
+
+  enable_dns64                                   = var.enable_ipv6 ? var.enable_dns64 : false
+  ipv6_cidr_block                                = var.enable_ipv6 ? each.value.ipv6_cidr_block : null
+  assign_ipv6_address_on_creation                = var.enable_ipv6 ? var.assign_ipv6_address_on_creation : false
+  enable_resource_name_dns_a_record_on_launch    = var.enable_ipv6 ? var.enable_resource_name_dns_a_record_on_launch : false
+  enable_resource_name_dns_aaaa_record_on_launch = var.enable_ipv6 ? var.enable_resource_name_dns_aaaa_record_on_launch : false
+
   map_public_ip_on_launch = lookup(each.value, "map_public_ip_on_launch", false)
   tags = merge(
     {
