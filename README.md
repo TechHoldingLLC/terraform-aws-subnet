@@ -32,8 +32,13 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_assign_ipv6_address_on_creation"></a> [assign\_ipv6\_address\_on\_creation](#input\_assign\_ipv6\_address\_on\_creation) | Specifies whether to assign ipv6 address to resources in subnet on creation | `bool` | `false` | no |
 | <a name="input_availability_zones"></a> [availability\_zones](#input\_availability\_zones) | Number of availability zones for subnet deployment | `list(any)` | n/a | yes |
 | <a name="input_create_acl"></a> [create\_acl](#input\_create\_acl) | Create ACL | `bool` | `false` | no |
+| <a name="input_enable_dns64"></a> [enable\_dns64](#input\_enable\_dns64) | Specifies whether to enable DNS64 | `bool` | `false` | no |
+| <a name="input_enable_ipv6"></a> [enable\_ipv6](#input\_enable\_ipv6) | Specifies whether to enable IPv6 | `bool` | `false` | no |
+| <a name="input_enable_resource_name_dns_a_record_on_launch"></a> [enable\_resource\_name\_dns\_a\_record\_on\_launch](#input\_enable\_resource\_name\_dns\_a\_record\_on\_launch) | Specifies whether to respond to DNS queries for instance hostnames with DNS A records | `bool` | `false` | no |
+| <a name="input_enable_resource_name_dns_aaaa_record_on_launch"></a> [enable\_resource\_name\_dns\_aaaa\_record\_on\_launch](#input\_enable\_resource\_name\_dns\_aaaa\_record\_on\_launch) | Specifies whether to respond to DNS queries for instance hostnames with DNS AAAA records | `bool` | `false` | no |
 | <a name="input_nacl_egress"></a> [nacl\_egress](#input\_nacl\_egress) | Network ACLs for outbound traffic in Subnets | `list(any)` | `[]` | no |
 | <a name="input_nacl_ingress"></a> [nacl\_ingress](#input\_nacl\_ingress) | Network ACLs for inbound traffic in Subnets | `list(any)` | `[]` | no |
 | <a name="input_name"></a> [name](#input\_name) | Name tag | `string` | n/a | yes |
@@ -55,7 +60,3 @@ No modules.
 | <a name="output_public_subnet_cidr_blocks"></a> [public\_subnet\_cidr\_blocks](#output\_public\_subnet\_cidr\_blocks) | n/a |
 | <a name="output_public_subnet_ids"></a> [public\_subnet\_ids](#output\_public\_subnet\_ids) | n/a |
 | <a name="output_vpc_id"></a> [vpc\_id](#output\_vpc\_id) | n/a |
-
-## License
-
-Apache 2 Licensed. See [LICENSE](https://github.com/TechHoldingLLC/terraform-aws-subnet/blob/main/LICENSE) for full details.

@@ -104,3 +104,48 @@ module "public_subnet" {
 
 }
 ```
+
+## Create a Public/Private Subnet with IPv6 configuration
+```
+module "subnet" {
+  source                  = "../terraform-aws-subnet"
+  name                    = "subnet-name"
+  vpc_id                  = module.vpc.id
+  availability_zones      = module.vpc.availability_zones
+  public_route_table_ids  = module.vpc.public_route_table_ids
+  private_route_table_ids = module.vpc.private_route_table_ids
+
+  enable_ipv6                                    = true
+  assign_ipv6_address_on_creation                = true ## Set true to assing IPv6 address to resources on creation
+  enable_dns64                                   = true ## Set true to enable DNS64
+  enable_resource_name_dns_a_record_on_launch    = true ## Set true to enable response to DNS queries for instance hostnames with DNS A records
+  enable_resource_name_dns_aaaa_record_on_launch = true ## Set true to enable response to DNS queries for instance hostnames with DNS AAAA records
+
+  public_subnets = [
+    {
+      network = "10.0"
+      cidr_blocks = [
+        "11.0/24"
+      ]
+      ipv6_network = substr(module.vpc.ipv6_cidr_block, 0, 17)
+      ipv6_cidr_blocks = [
+        "81::/64"
+      ]
+    }
+  ]
+
+  private_subnets = [
+    {
+      network = "10.0"
+      cidr_blocks = [
+        "121.0/24"
+      ]
+      ipv6_network = substr(module.vpc.ipv6_cidr_block, 0, 17)
+      ipv6_cidr_blocks = [
+        "91::/64"
+      ]
+    }
+  ]
+}
+
+```
