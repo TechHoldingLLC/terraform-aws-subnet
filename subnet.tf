@@ -7,23 +7,19 @@
 #------------------------------------------------------------------------------------
 locals {
   public_subnets = flatten([
-    for subnet in var.public_subnets : [
-      for index, cidr_block in subnet.cidr_blocks : {
-        cidr_block        = "${subnet.network}.${cidr_block}"
-        ipv6_cidr_block   = "${subnet.ipv6_network}${element(subnet.ipv6_cidr_blocks, index)}"
-        availability_zone = element(var.availability_zones, index)
-      }
-    ]
+    for index, subnet in var.public_subnets : {
+      cidr_block        = subnet.cidr_block
+      ipv6_cidr_block   = subnet.ipv6_cidr_block
+      availability_zone = element(var.availability_zones, index)
+    }
   ])
 
   private_subnets = flatten([
-    for subnet in var.private_subnets : [
-      for index, cidr_block in subnet.cidr_blocks : {
-        cidr_block        = "${subnet.network}.${cidr_block}"
-        ipv6_cidr_block   = "${subnet.ipv6_network}${element(subnet.ipv6_cidr_blocks, index)}"
-        availability_zone = element(var.availability_zones, index)
-      }
-    ]
+    for index, subnet in var.private_subnets : {
+      cidr_block        = subnet.cidr_block
+      ipv6_cidr_block   = subnet.ipv6_cidr_block
+      availability_zone = element(var.availability_zones, index)
+    }
   ])
 
   nacl_ingress = flatten([
@@ -57,9 +53,11 @@ locals {
   public_subnet_ids                 = [for subnet in aws_subnet.public_subnet : subnet.id]
   public_subnet_availability_zones  = [for subnet in aws_subnet.public_subnet : subnet.availability_zone]
   public_subnet_cidr_blocks         = [for subnet in aws_subnet.public_subnet : subnet.cidr_block]
+  public_subnet_ipv6_cidr_blocks    = [for subnet in aws_subnet.public_subnet : subnet.ipv6_cidr_block]
   private_subnet_ids                = [for subnet in aws_subnet.private_subnet : subnet.id]
   private_subnet_availability_zones = [for subnet in aws_subnet.private_subnet : subnet.availability_zone]
   private_subnet_cidr_blocks        = [for subnet in aws_subnet.private_subnet : subnet.cidr_block]
+  private_subnet_ipv6_cidr_blocks   = [for subnet in aws_subnet.private_subnet : subnet.ipv6_cidr_block]
 }
 
 #------------------------------------------------------------------------------------
@@ -88,7 +86,7 @@ resource "aws_subnet" "public_subnet" {
 
 ## Public route table association
 resource "aws_route_table_association" "public_subnet" {
-  count          = length(keys(aws_subnet.public_subnet))
+  count          = var.public_route_table_ids == null ? 0 : length(keys(aws_subnet.public_subnet))
   subnet_id      = element([for subnet in aws_subnet.public_subnet : subnet.id], count.index)
   route_table_id = element(var.public_route_table_ids, count.index)
 }
@@ -119,7 +117,7 @@ resource "aws_subnet" "private_subnet" {
 
 ## Private route table association
 resource "aws_route_table_association" "private_subnet" {
-  count          = length(keys(aws_subnet.private_subnet))
+  count          = var.private_route_table_ids == null ? 0 : length(keys(aws_subnet.private_subnet))
   subnet_id      = element([for subnet in aws_subnet.private_subnet : subnet.id], count.index)
   route_table_id = element(var.private_route_table_ids, count.index)
 }
