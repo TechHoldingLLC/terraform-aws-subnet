@@ -62,9 +62,11 @@ locals {
   ])
 
   public_subnet_ids                 = [for subnet in aws_subnet.public_subnet : subnet.id]
+  public_subnet_dual_stack_ids      = [for subnet in aws_subnet.public_subnet_dual_stack : subnet.id]
   public_subnet_availability_zones  = [for subnet in aws_subnet.public_subnet : subnet.availability_zone]
-  public_subnet_cidr_blocks         = [for subnet in aws_subnet.public_subnet : subnet.cidr_block]
+  public_subnet_cidr_blocks         = var.public_subnets
   private_subnet_ids                = [for subnet in aws_subnet.private_subnet : subnet.id]
+  private_subnet_dual_stack_ids     = [for subnet in aws_subnet.private_subnet_dual_stack : subnet.id]
   private_subnet_availability_zones = [for subnet in aws_subnet.private_subnet : subnet.availability_zone]
-  private_subnet_cidr_blocks        = [for subnet in aws_subnet.private_subnet : subnet.cidr_block]
+  private_subnet_cidr_blocks        = var.private_subnets
 }

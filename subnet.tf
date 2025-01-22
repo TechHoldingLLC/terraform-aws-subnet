@@ -100,7 +100,7 @@ resource "aws_subnet" "private_subnet_dual_stack" {
   enable_resource_name_dns_a_record_on_launch    = var.enable_ipv6 ? var.enable_resource_name_dns_a_record_on_launch : false
   enable_resource_name_dns_aaaa_record_on_launch = var.enable_ipv6 ? var.enable_resource_name_dns_aaaa_record_on_launch : false
 
-  map_public_ip_on_launch = lookup(each.value, "map_public_ip_on_launch", true)
+  map_public_ip_on_launch = lookup(each.value, "map_public_ip_on_launch", false)
   tags = merge(
     {
       Name = "${var.name}-private-${each.value.availability_zone}"
