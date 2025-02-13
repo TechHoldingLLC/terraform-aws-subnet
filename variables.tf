@@ -70,13 +70,19 @@ variable "private_route_table_ids" {
 variable "nacl_ingress" {
   description = "Network ACLs for inbound traffic in Subnets"
   type        = list(any)
-  default     = []
+  validation {
+    condition     = alltrue([for rule in var.nacl_ingress : length(lookup(rule, "cidr_blocks", [])) > 0])
+    error_message = "You must have to declare at least one CIDR block in nacl_ingress."
+  }
 }
 
 variable "nacl_egress" {
   description = "Network ACLs for outbound traffic in Subnets"
   type        = list(any)
-  default     = []
+  validation {
+    condition     = alltrue([for rule in var.nacl_egress : length(lookup(rule, "cidr_blocks", [])) > 0])
+    error_message = "You must have to declare at least one CIDR block in nacl_egress."
+  }
 }
 
 variable "tags" {

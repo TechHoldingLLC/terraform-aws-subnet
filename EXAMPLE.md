@@ -55,6 +55,7 @@ module "private_subnet" {
 
   nacl_ingress = [        # do not forget to update port, protocol, rule_actions, cidr_blocks values in ingress and egress according to the need
     {
+      rule_number = 100
       port         = 0
       protocol     = "tcp"
       rule_actions = "allow"
@@ -64,6 +65,7 @@ module "private_subnet" {
 
   nacl_egress = [
     {
+      rule_number = 100
       port         = 0
       protocol     = "-1"
       rule_actions = "allow"

@@ -27,28 +27,28 @@ locals {
   ])
 
   nacl_ingress = flatten([
-    for idx, rule in var.nacl_ingress : [
+    for rule in var.nacl_ingress : [
       for index in range(length(rule.cidr_blocks)) : {
         from_port   = try(lookup(rule, "from_port"), lookup(rule, "port"))
         to_port     = try(lookup(rule, "to_port"), lookup(rule, "port"))
         rule_action = lookup(rule, "rule_action", "allow")
         protocol    = lookup(rule, "protocol", "-1")
         cidr_block  = tolist(rule.cidr_blocks)[index]
-        rule_number = ((idx + 2) * 100) + index
+        rule_number = rule.rule_number + index
         egress      = false
       }
     ]
   ])
 
   nacl_egress = flatten([
-    for idx, rule in var.nacl_egress : [
+    for rule in var.nacl_egress : [
       for index in range(length(rule.cidr_blocks)) : {
         from_port   = try(lookup(rule, "from_port"), lookup(rule, "port"))
         to_port     = try(lookup(rule, "to_port"), lookup(rule, "port"))
         rule_action = lookup(rule, "rule_action", "allow")
         protocol    = lookup(rule, "protocol", "-1")
         cidr_block  = tolist(rule.cidr_blocks)[index]
-        rule_number = ((idx + 2) * 100) + index
+        rule_number = rule.rule_number + index
         egress      = true
       }
     ]
