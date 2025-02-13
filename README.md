@@ -1,3 +1,4 @@
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
@@ -9,7 +10,7 @@
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.5 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 5.86.1 |
 
 ## Modules
 
@@ -39,8 +40,8 @@ No modules.
 | <a name="input_enable_ipv6"></a> [enable\_ipv6](#input\_enable\_ipv6) | Specifies whether to enable IPv6 | `bool` | `false` | no |
 | <a name="input_enable_resource_name_dns_a_record_on_launch"></a> [enable\_resource\_name\_dns\_a\_record\_on\_launch](#input\_enable\_resource\_name\_dns\_a\_record\_on\_launch) | Specifies whether to respond to DNS queries for instance hostnames with DNS A records | `bool` | `false` | no |
 | <a name="input_enable_resource_name_dns_aaaa_record_on_launch"></a> [enable\_resource\_name\_dns\_aaaa\_record\_on\_launch](#input\_enable\_resource\_name\_dns\_aaaa\_record\_on\_launch) | Specifies whether to respond to DNS queries for instance hostnames with DNS AAAA records | `bool` | `false` | no |
-| <a name="input_nacl_egress"></a> [nacl\_egress](#input\_nacl\_egress) | Network ACLs for outbound traffic in Subnets | `list(any)` | `[]` | no |
-| <a name="input_nacl_ingress"></a> [nacl\_ingress](#input\_nacl\_ingress) | Network ACLs for inbound traffic in Subnets | `list(any)` | `[]` | no |
+| <a name="input_nacl_egress"></a> [nacl\_egress](#input\_nacl\_egress) | Network ACLs for outbound traffic in Subnets | `list(any)` | n/a | yes |
+| <a name="input_nacl_ingress"></a> [nacl\_ingress](#input\_nacl\_ingress) | Network ACLs for inbound traffic in Subnets | `list(any)` | n/a | yes |
 | <a name="input_name"></a> [name](#input\_name) | Name tag | `string` | n/a | yes |
 | <a name="input_private_route_table_ids"></a> [private\_route\_table\_ids](#input\_private\_route\_table\_ids) | Public route table ids | `list(any)` | `[]` | no |
 | <a name="input_private_subnets"></a> [private\_subnets](#input\_private\_subnets) | Private subnets config | `any` | `[]` | no |
@@ -60,3 +61,4 @@ No modules.
 | <a name="output_public_subnet_cidr_blocks"></a> [public\_subnet\_cidr\_blocks](#output\_public\_subnet\_cidr\_blocks) | n/a |
 | <a name="output_public_subnet_ids"></a> [public\_subnet\_ids](#output\_public\_subnet\_ids) | n/a |
 | <a name="output_vpc_id"></a> [vpc\_id](#output\_vpc\_id) | n/a |
+<!-- END_TF_DOCS -->
