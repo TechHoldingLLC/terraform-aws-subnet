@@ -15,7 +15,7 @@ output "public_subnet_cidr_blocks" {
 }
 
 output "public_subnet_ipv6_cidr_blocks" {
-  value = local.public_subnet_cidr_blocks
+  value = local.public_subnet_ipv6_cidr_blocks
 }
 
 output "private_subnet_ids" {
@@ -31,7 +31,7 @@ output "private_subnet_cidr_blocks" {
 }
 
 output "private_subnet_ipv6_cidr_blocks" {
-  value = local.private_subnet_cidr_blocks
+  value = local.private_subnet_ipv6_cidr_blocks
 }
 
 output "vpc_id" {
