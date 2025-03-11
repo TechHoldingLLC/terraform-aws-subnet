@@ -16,26 +16,28 @@ resource "aws_network_acl_association" "nacl_association" {
 
 ## Network ACL rule for inbound traffic
 resource "aws_network_acl_rule" "ingress_nacl_rule" {
-  for_each       = var.create_acl ? { for index, rule in local.nacl_ingress : "${var.name}-${rule.rule_number}-${rule.egress}" => rule } : {}
-  network_acl_id = aws_network_acl.nacl[0].id
-  rule_number    = lookup(each.value, "rule_number")
-  egress         = lookup(each.value, "egress")
-  protocol       = lookup(each.value, "protocol")
-  rule_action    = lookup(each.value, "rule_action")
-  cidr_block     = lookup(each.value, "cidr_block")
-  from_port      = lookup(each.value, "from_port")
-  to_port        = lookup(each.value, "to_port")
+  for_each        = var.create_acl ? { for index, rule in local.nacl_ingress : "${var.name}-${rule.rule_number}-${rule.egress}" => rule } : {}
+  network_acl_id  = aws_network_acl.nacl[0].id
+  rule_number     = lookup(each.value, "rule_number")
+  egress          = lookup(each.value, "egress")
+  protocol        = lookup(each.value, "protocol")
+  rule_action     = lookup(each.value, "rule_action")
+  cidr_block      = lookup(each.value, "cidr_block")
+  ipv6_cidr_block = lookup(each.value, "ipv6_cidr_block", null)
+  from_port       = lookup(each.value, "from_port")
+  to_port         = lookup(each.value, "to_port")
 }
 
 ## Network ACL rule for outbound traffic
 resource "aws_network_acl_rule" "egress_nacl_rule" {
-  for_each       = var.create_acl ? { for index, rule in local.nacl_egress : "${var.name}-${rule.rule_number}-${rule.egress}" => rule } : {}
-  network_acl_id = aws_network_acl.nacl[0].id
-  rule_number    = lookup(each.value, "rule_number")
-  egress         = lookup(each.value, "egress")
-  protocol       = lookup(each.value, "protocol")
-  rule_action    = lookup(each.value, "rule_action")
-  cidr_block     = lookup(each.value, "cidr_block")
-  from_port      = lookup(each.value, "from_port")
-  to_port        = lookup(each.value, "to_port")
+  for_each        = var.create_acl ? { for index, rule in local.nacl_egress : "${var.name}-${rule.rule_number}-${rule.egress}" => rule } : {}
+  network_acl_id  = aws_network_acl.nacl[0].id
+  rule_number     = lookup(each.value, "rule_number")
+  egress          = lookup(each.value, "egress")
+  protocol        = lookup(each.value, "protocol")
+  rule_action     = lookup(each.value, "rule_action")
+  cidr_block      = lookup(each.value, "cidr_block")
+  ipv6_cidr_block = lookup(each.value, "ipv6_cidr_block", null)
+  from_port       = lookup(each.value, "from_port")
+  to_port         = lookup(each.value, "to_port")
 }
