@@ -1,55 +1,72 @@
 # Subnet
 Below is an examples of calling this module.
 
-## Create a Subnet
+## Create a Public Subnet with default nacl rules
 ```
-module "subnet" {
-  source             = "./subnet"
-  name               = "my-project-subnet"
-  vpc_id             = "vpc-x1y2z3"
-}
-```
+module "public_subnet" {
+  source = "git::https://github.com/TechHoldingLLC/terraform-aws-subnet.git?ref=v1.0.0"
 
-## Create private subnet with default nacl rule
-```
-module "private_subnet" {
-  source                  = "./subnet"
-  name                    = "my-project-private-subnet"
-  vpc_id                  = module.vpc.id
-  availability_zones      = module.vpc.availability_zones
-  private_route_table_ids = module.vpc.private_route_table_ids
-  private_subnets = [          # do not forget to update these values according to the need
+  name               = "my-project-public-subnet"
+  vpc_id             = module.vpc.id
+  availability_zones = module.vpc.availability_zones
+
+  public_subnets = [
     {
-      network = "10.0"  
-      cidr_blocks = [    
-        "106.0/24",    
-        "107.0/24"
-      ]
+      "cidr_block" = "10.0.0.0/24"
+    },
+    {
+      "cidr_block" = "10.0.1.0/24"
     }
   ]
+
+  public_route_table_ids = [aws_route_table.public_route_table.id] # Required if passed value for public_subnets
 }
 ```
 
-## Create a Private Subnet with custom name, vpc_id, availability_zones, private_route_table_ids, private_subnets values and nacl rules
+## Create private subnet with default nacl rules
+```
+module "private_subnet" {
+  source = "git::https://github.com/TechHoldingLLC/terraform-aws-subnet.git?ref=v1.0.0"
+
+  name               = "my-project-private-subnet"
+  vpc_id             = module.vpc.id
+  availability_zones = module.vpc.availability_zones
+
+  private_subnets = [
+    {
+      "cidr_block" = "10.0.0.0/24"
+    },
+    {
+      "cidr_block" = "10.0.1.0/24"
+    }
+  ]
+
+  private_route_table_ids = [aws_route_table.private_route_table.id] # Required if passed value for private_subnets
+}
+```
+
+## Create a Private Subnet with nacl rules
 Note: Before creating this module, You need to create a VPC.  
 
 ```
 module "private_subnet" {
-  source             = "./subnet"
+  source = "git::https://github.com/TechHoldingLLC/terraform-aws-subnet.git?ref=v1.0.0"
+
   name               = "my-project-private-subnet"
   vpc_id             = module.vpc.id
   availability_zones = module.vpc.availability_zones
-  create_acl         = true
+
+  create_acl = true
 
   # Private subnets
   private_route_table_ids = module.vpc.private_route_table_ids
-  private_subnets = [          # do not forget to update these values according to the need
+
+  private_subnets = [
     {
-      network = "10.0"  
-      cidr_blocks = [    
-        "106.0/24",    
-        "107.0/24"
-      ]
+      "cidr_block" = "10.0.0.0/24"
+    },
+    {
+      "cidr_block" = "10.0.1.0/24"
     }
   ]
 
@@ -77,41 +94,15 @@ module "private_subnet" {
 }
 ```
 
-
-## Create a Public Subnet with custom name, vpc_id, availability_zones, private_route_table_ids, private_subnets values
+## Create dual stack public and private subnets
 ```
-module "public_subnet" {
-  source             = "../terraform-subnet"
-  name               = "my-project-public-subnet"
+module "subnet" {
+  source = "git::https://github.com/TechHoldingLLC/terraform-aws-subnet.git?ref=v1.0.0"
+
+  name               = "my-project-private-subnet"
   vpc_id             = module.vpc.id
   availability_zones = module.vpc.availability_zones
 
-  # Public subnets
-  public_route_table_ids = module.vpc.public_route_table_ids
-  public_subnets = [
-    {
-      network = "10.0"       # do not forget to update these values according to the need
-      cidr_blocks = [    
-        "0.0/24",
-        "1.0/24"
-      ]
-    }
-  ]
-
-  providers = {
-    aws = aws
-  }
-
-}
-```
-
-## Create a Public/Private Subnet with IPv6 configuration
-```
-module "subnet" {
-  source                  = "../terraform-aws-subnet"
-  name                    = "subnet-name"
-  vpc_id                  = module.vpc.id
-  availability_zones      = module.vpc.availability_zones
   public_route_table_ids  = module.vpc.public_route_table_ids
   private_route_table_ids = module.vpc.private_route_table_ids
 
@@ -123,29 +114,64 @@ module "subnet" {
 
   public_subnets = [
     {
-      network = "10.0"
-      cidr_blocks = [
-        "11.0/24"
-      ]
-      ipv6_network = substr(module.vpc.ipv6_cidr_block, 0, 17)
-      ipv6_cidr_blocks = [
-        "81::/64"
-      ]
+      "cidr_block"      = "10.0.0.0/24"
+      "ipv6_cidr_block" = "2001:db8:1234:ab00::/64"
+    },
+    {
+      "cidr_block"      = "10.0.1.0/24"
+      "ipv6_cidr_block" = "2001:db8:1234:ab01::/64"
     }
   ]
 
-  private_subnets = [
+  public_subnets = [
     {
-      network = "10.0"
-      cidr_blocks = [
-        "121.0/24"
-      ]
-      ipv6_network = substr(module.vpc.ipv6_cidr_block, 0, 17)
-      ipv6_cidr_blocks = [
-        "91::/64"
-      ]
+      "cidr_block"      = "10.0.100.0/24"
+      "ipv6_cidr_block" = "2001:db8:1234:ab64::/64"
+    },
+    {
+      "cidr_block"      = "10.0.101.0/24"
+      "ipv6_cidr_block" = "2001:db8:1234:ab65::/64"
     }
   ]
 }
+```
 
+## Create IPv4 and dual stack public and private subnets
+```
+module "subnet" {
+  source = "git::https://github.com/TechHoldingLLC/terraform-aws-subnet.git?ref=v1.0.0"
+
+  name               = "my-project-private-subnet"
+  vpc_id             = module.vpc.id
+  availability_zones = module.vpc.availability_zones
+
+  public_route_table_ids  = module.vpc.public_route_table_ids
+  private_route_table_ids = module.vpc.private_route_table_ids
+
+  enable_ipv6                                    = true
+  assign_ipv6_address_on_creation                = true 
+  enable_dns64                                   = true 
+  enable_resource_name_dns_a_record_on_launch    = true 
+  enable_resource_name_dns_aaaa_record_on_launch = true 
+
+  public_subnets = [
+    {
+      "cidr_block"      = "10.0.0.0/24"
+      "ipv6_cidr_block" = "2001:db8:1234:ab00::/64"
+    },
+    {
+      "cidr_block" = "10.0.1.0/24"
+    }
+  ]
+
+  public_subnets = [
+    {
+      "cidr_block"      = "10.0.100.0/24"
+      "ipv6_cidr_block" = "2001:db8:1234:ab64::/64"
+    },
+    {
+      "cidr_block" = "10.0.101.0/24"
+    }
+  ]
+}
 ```

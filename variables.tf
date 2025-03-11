@@ -10,7 +10,7 @@ variable "assign_ipv6_address_on_creation" {
 
 variable "availability_zones" {
   description = "Number of availability zones for subnet deployment"
-  type        = list(any)
+  type        = any
 }
 
 variable "create_acl" {
@@ -52,7 +52,7 @@ variable "public_subnets" {
 variable "public_route_table_ids" {
   description = "Public route table ids"
   type        = list(any)
-  default     = []
+  default     = null
 }
 
 variable "private_subnets" {
@@ -64,7 +64,7 @@ variable "private_subnets" {
 variable "private_route_table_ids" {
   description = "Public route table ids"
   type        = list(any)
-  default     = []
+  default     = null
 }
 
 variable "nacl_ingress" {
