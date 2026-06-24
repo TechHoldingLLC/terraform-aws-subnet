@@ -1,6 +1,8 @@
 # Subnet
 Below is an examples of calling this module.
 
+> **IPv6 is mandatory.** Every entry in `public_subnets` and `private_subnets` must include `ipv6_network` and `ipv6_cidr_blocks` alongside the IPv4 `network` and `cidr_blocks`. The parent VPC must have an IPv6 CIDR assigned (`assign_generated_ipv6_cidr_block = true`).
+
 ## Create a Subnet
 ```
 module "subnet" {
@@ -20,10 +22,15 @@ module "private_subnet" {
   private_route_table_ids = module.vpc.private_route_table_ids
   private_subnets = [          # do not forget to update these values according to the need
     {
-      network = "10.0"  
-      cidr_blocks = [    
-        "106.0/24",    
+      network = "10.0"
+      cidr_blocks = [
+        "106.0/24",
         "107.0/24"
+      ]
+      ipv6_network = substr(module.vpc.ipv6_cidr_block, 0, 17)
+      ipv6_cidr_blocks = [
+        "60::/64",
+        "61::/64"
       ]
     }
   ]
@@ -45,29 +52,58 @@ module "private_subnet" {
   private_route_table_ids = module.vpc.private_route_table_ids
   private_subnets = [          # do not forget to update these values according to the need
     {
-      network = "10.0"  
-      cidr_blocks = [    
-        "106.0/24",    
+      network = "10.0"
+      cidr_blocks = [
+        "106.0/24",
         "107.0/24"
+      ]
+      ipv6_network = substr(module.vpc.ipv6_cidr_block, 0, 17)
+      ipv6_cidr_blocks = [
+        "60::/64",
+        "61::/64"
       ]
     }
   ]
 
-  nacl_ingress = [        # do not forget to update port, protocol, rule_actions, cidr_blocks values in ingress and egress according to the need
+  # NACL rules accept IPv4 (`cidr_blocks`) and/or IPv6 (`ipv6_cidr_blocks`) per rule.
+  # At least one of the two is required. You can mix patterns across rules:
+  #   - both:   matches IPv4 and IPv6 traffic (one AWS NACL rule per CIDR is created)
+  #   - v4 only: omit `ipv6_cidr_blocks`
+  #   - v6 only: omit `cidr_blocks`
+  nacl_ingress = [
     {
-      port         = 0
-      protocol     = "tcp"
-      rule_actions = "allow"
-      cidr_blocks  = ["1.1.1.1/32", "2.2.2.1/32"]
+      # Rule with BOTH IPv4 and IPv6 — allow inbound HTTPS from these CIDRs
+      port             = 443
+      protocol         = "tcp"
+      rule_action      = "allow"
+      cidr_blocks      = ["1.1.1.1/32", "2.2.2.1/32"]
+      ipv6_cidr_blocks = ["2001:db8::/32"]
+    },
+    {
+      # Rule with IPv4 ONLY — allow SSH from a specific office IP
+      port        = 22
+      protocol    = "tcp"
+      rule_action = "allow"
+      cidr_blocks = ["203.0.113.5/32"]
+    },
+    {
+      # Rule with IPv6 ONLY — allow inbound HTTP from any IPv6 source
+      port             = 80
+      protocol         = "tcp"
+      rule_action      = "allow"
+      ipv6_cidr_blocks = ["::/0"]
     }
   ]
 
   nacl_egress = [
     {
-      port         = 0
-      protocol     = "-1"
-      rule_actions = "allow"
-      cidr_blocks  = ["3.3.3.1/32", "4.4.4.1/32"]
+      # Allow all outbound IPv4 and IPv6
+      from_port        = 0
+      to_port          = 0
+      protocol         = "-1"
+      rule_action      = "allow"
+      cidr_blocks      = ["0.0.0.0/0"]
+      ipv6_cidr_blocks = ["::/0"]
     }
   ]
 
@@ -91,9 +127,14 @@ module "public_subnet" {
   public_subnets = [
     {
       network = "10.0"       # do not forget to update these values according to the need
-      cidr_blocks = [    
+      cidr_blocks = [
         "0.0/24",
         "1.0/24"
+      ]
+      ipv6_network = substr(module.vpc.ipv6_cidr_block, 0, 17)
+      ipv6_cidr_blocks = [
+        "00::/64",
+        "01::/64"
       ]
     }
   ]
@@ -105,7 +146,7 @@ module "public_subnet" {
 }
 ```
 
-## Create a Public/Private Subnet with IPv6 configuration
+## Create a Public/Private Subnet with optional IPv6 toggles enabled
 ```
 module "subnet" {
   source                  = "../terraform-aws-subnet"
@@ -115,11 +156,10 @@ module "subnet" {
   public_route_table_ids  = module.vpc.public_route_table_ids
   private_route_table_ids = module.vpc.private_route_table_ids
 
-  enable_ipv6                                    = true
-  assign_ipv6_address_on_creation                = true ## Set true to assing IPv6 address to resources on creation
-  enable_dns64                                   = true ## Set true to enable DNS64
-  enable_resource_name_dns_a_record_on_launch    = true ## Set true to enable response to DNS queries for instance hostnames with DNS A records
-  enable_resource_name_dns_aaaa_record_on_launch = true ## Set true to enable response to DNS queries for instance hostnames with DNS AAAA records
+  assign_ipv6_address_on_creation                = true ## Set true to auto-assign an IPv6 address to ENIs created in the subnet
+  enable_dns64                                   = true ## Set true to enable DNS64 (typically used with IPv6-only subnets)
+  enable_resource_name_dns_a_record_on_launch    = true ## Set true so resource-based hostnames return an A record (IPv4)
+  enable_resource_name_dns_aaaa_record_on_launch = true ## Set true so resource-based hostnames return an AAAA record (IPv6)
 
   public_subnets = [
     {

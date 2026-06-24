@@ -25,12 +25,6 @@ variable "enable_dns64" {
   default     = false
 }
 
-variable "enable_ipv6" {
-  description = "Specifies whether to enable IPv6"
-  type        = bool
-  default     = false
-}
-
 variable "enable_resource_name_dns_a_record_on_launch" {
   description = "Specifies whether to respond to DNS queries for instance hostnames with DNS A records"
   type        = bool
