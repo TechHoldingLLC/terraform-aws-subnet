@@ -172,7 +172,7 @@ resource "aws_network_acl_association" "nacl_association" {
 
 ## Network ACL rule for inbound traffic
 resource "aws_network_acl_rule" "ingress_nacl_rule" {
-  for_each        = var.create_acl ? { for index, rule in local.nacl_ingress : "${var.name}-${rule.rule_number}-${rule.egress}" => rule } : {}
+  for_each        = var.create_acl ? { for index, rule in local.nacl_ingress : "${var.name}-ingress-${index}" => rule } : {}
   network_acl_id  = aws_network_acl.nacl[0].id
   rule_number     = lookup(each.value, "rule_number")
   egress          = lookup(each.value, "egress")
@@ -186,7 +186,7 @@ resource "aws_network_acl_rule" "ingress_nacl_rule" {
 
 ## Network ACL rule for outbound traffic
 resource "aws_network_acl_rule" "egress_nacl_rule" {
-  for_each        = var.create_acl ? { for index, rule in local.nacl_egress : "${var.name}-${rule.rule_number}-${rule.egress}" => rule } : {}
+  for_each        = var.create_acl ? { for index, rule in local.nacl_egress : "${var.name}-egress-${index}" => rule } : {}
   network_acl_id  = aws_network_acl.nacl[0].id
   rule_number     = lookup(each.value, "rule_number")
   egress          = lookup(each.value, "egress")
