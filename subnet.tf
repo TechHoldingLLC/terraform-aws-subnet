@@ -29,25 +29,25 @@ locals {
   nacl_ingress = flatten([                      # flatten = Convert the list of lists into a single list
     for idx, rule in var.nacl_ingress : concat( # combine the two lists of ingress rules for IPv4 and IPv6 into a single list
       [
-        for index, cidr in tolist(try(rule.cidr_blocks, [])) : { # try = Check cidr_blocks for IPv4 exist or not if not then assign empty list to avoid error, tolist = Convert the result to a list
+        for index in range(length(try(rule.cidr_blocks, []))) : {
           from_port       = try(lookup(rule, "from_port"), lookup(rule, "port"))
           to_port         = try(lookup(rule, "to_port"), lookup(rule, "port"))
           rule_action     = lookup(rule, "rule_action", "allow")
           protocol        = lookup(rule, "protocol", "-1")
-          cidr_block      = cidr
+          cidr_block      = tolist(rule.cidr_blocks)[index]
           ipv6_cidr_block = null
           rule_number     = ((idx + 2) * 100) + index
           egress          = false
         }
       ],
       [
-        for index, cidr in tolist(try(rule.ipv6_cidr_blocks, [])) : { # try = Check ipv6_cidr_blocks for IPv6 exist or not if not then assign empty list to avoid error, tolist = Convert the result to a list
+        for index in range(length(try(rule.ipv6_cidr_blocks, []))) : {
           from_port       = try(lookup(rule, "from_port"), lookup(rule, "port"))
           to_port         = try(lookup(rule, "to_port"), lookup(rule, "port"))
           rule_action     = lookup(rule, "rule_action", "allow")
           protocol        = lookup(rule, "protocol", "-1")
           cidr_block      = null
-          ipv6_cidr_block = cidr
+          ipv6_cidr_block = tolist(rule.ipv6_cidr_blocks)[index]
           rule_number     = ((idx + 2) * 100) + 50 + index
           egress          = false
         }
@@ -58,25 +58,25 @@ locals {
   nacl_egress = flatten([
     for idx, rule in var.nacl_egress : concat(
       [
-        for index, cidr in tolist(try(rule.cidr_blocks, [])) : {
+        for index in range(length(try(rule.cidr_blocks, []))) : {
           from_port       = try(lookup(rule, "from_port"), lookup(rule, "port"))
           to_port         = try(lookup(rule, "to_port"), lookup(rule, "port"))
           rule_action     = lookup(rule, "rule_action", "allow")
           protocol        = lookup(rule, "protocol", "-1")
-          cidr_block      = cidr
+          cidr_block      = tolist(rule.cidr_blocks)[index]
           ipv6_cidr_block = null
           rule_number     = ((idx + 2) * 100) + index
           egress          = true
         }
       ],
       [
-        for index, cidr in tolist(try(rule.ipv6_cidr_blocks, [])) : {
+        for index in range(length(try(rule.ipv6_cidr_blocks, []))) : {
           from_port       = try(lookup(rule, "from_port"), lookup(rule, "port"))
           to_port         = try(lookup(rule, "to_port"), lookup(rule, "port"))
           rule_action     = lookup(rule, "rule_action", "allow")
           protocol        = lookup(rule, "protocol", "-1")
           cidr_block      = null
-          ipv6_cidr_block = cidr
+          ipv6_cidr_block = tolist(rule.ipv6_cidr_blocks)[index]
           rule_number     = ((idx + 2) * 100) + 50 + index
           egress          = true
         }
