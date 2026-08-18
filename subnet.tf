@@ -9,9 +9,10 @@ locals {
   public_subnets = flatten([
     for subnet in var.public_subnets : [
       for index, cidr_block in subnet.cidr_blocks : {
-        cidr_block        = "${subnet.network}.${cidr_block}"
-        ipv6_cidr_block   = "${subnet.ipv6_network}${element(subnet.ipv6_cidr_blocks, index)}"
-        availability_zone = element(var.availability_zones, index)
+        cidr_block              = "${subnet.network}.${cidr_block}"
+        ipv6_cidr_block         = "${subnet.ipv6_network}${element(subnet.ipv6_cidr_blocks, index)}"
+        availability_zone       = element(var.availability_zones, index)
+        map_public_ip_on_launch = try(subnet.map_public_ip_on_launch, true)
       }
     ]
   ])
@@ -19,9 +20,10 @@ locals {
   private_subnets = flatten([
     for subnet in var.private_subnets : [
       for index, cidr_block in subnet.cidr_blocks : {
-        cidr_block        = "${subnet.network}.${cidr_block}"
-        ipv6_cidr_block   = "${subnet.ipv6_network}${element(subnet.ipv6_cidr_blocks, index)}"
-        availability_zone = element(var.availability_zones, index)
+        cidr_block              = "${subnet.network}.${cidr_block}"
+        ipv6_cidr_block         = "${subnet.ipv6_network}${element(subnet.ipv6_cidr_blocks, index)}"
+        availability_zone       = element(var.availability_zones, index)
+        map_public_ip_on_launch = try(subnet.map_public_ip_on_launch, false)
       }
     ]
   ])
