@@ -1,7 +1,9 @@
 # Subnet
 Below is an examples of calling this module.
 
-> **IPv6 is optional.** Every entry in `public_subnets` and `private_subnets` only requires the IPv4 `network` and `cidr_blocks`. If you also want an IPv6 CIDR on a subnet, add `ipv6_network` and `ipv6_cidr_blocks` to that entry (the parent VPC must have an IPv6 CIDR assigned via `assign_generated_ipv6_cidr_block = true`). Omit them and the subnet is created as IPv4-only.
+> **IPv6 is mandatory for public subnets.** Every entry in `public_subnets` must include `ipv6_network` and `ipv6_cidr_blocks` alongside the IPv4 `network` and `cidr_blocks`. The parent VPC must have an IPv6 CIDR assigned (`assign_generated_ipv6_cidr_block = true`).
+>
+> **IPv6 is optional for private subnets.** Entries in `private_subnets` only require the IPv4 `network` and `cidr_blocks`. Add `ipv6_network` and `ipv6_cidr_blocks` to a private subnet entry if you also want an IPv6 CIDR on it; omit them and that subnet is created as IPv4-only.
 
 ## Create a Subnet
 ```

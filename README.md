@@ -42,9 +42,9 @@ No modules.
 | <a name="input_nacl_ingress"></a> [nacl\_ingress](#input\_nacl\_ingress) | Network ACLs for inbound traffic in Subnets | `list(any)` | `[]` | no |
 | <a name="input_name"></a> [name](#input\_name) | Name tag | `string` | n/a | yes |
 | <a name="input_private_route_table_ids"></a> [private\_route\_table\_ids](#input\_private\_route\_table\_ids) | Public route table ids | `list(any)` | `[]` | no |
-| <a name="input_private_subnets"></a> [private\_subnets](#input\_private\_subnets) | Private subnets config | `any` | `[]` | no |
+| <a name="input_private_subnets"></a> [private\_subnets](#input\_private\_subnets) | Private subnets config. IPv6 is optional: omit ipv6\_network and ipv6\_cidr\_blocks on an entry to create that subnet as IPv4-only | `any` | `[]` | no |
 | <a name="input_public_route_table_ids"></a> [public\_route\_table\_ids](#input\_public\_route\_table\_ids) | Public route table ids | `list(any)` | `[]` | no |
-| <a name="input_public_subnets"></a> [public\_subnets](#input\_public\_subnets) | Public subnets config | `any` | `[]` | no |
+| <a name="input_public_subnets"></a> [public\_subnets](#input\_public\_subnets) | Public subnets config. IPv6 is mandatory: each entry must set both ipv6\_network and ipv6\_cidr\_blocks alongside network and cidr\_blocks | `any` | `[]` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | Tags | `map(any)` | `{}` | no |
 | <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | VPC id | `string` | n/a | yes |
 

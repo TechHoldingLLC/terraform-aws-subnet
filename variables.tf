@@ -38,7 +38,7 @@ variable "enable_resource_name_dns_aaaa_record_on_launch" {
 }
 
 variable "public_subnets" {
-  description = "Public subnets config"
+  description = "Public subnets config. IPv6 is mandatory: each entry must set both ipv6_network and ipv6_cidr_blocks alongside network and cidr_blocks"
   type        = any
   default     = []
 }
@@ -50,7 +50,7 @@ variable "public_route_table_ids" {
 }
 
 variable "private_subnets" {
-  description = "Private subnets config"
+  description = "Private subnets config. IPv6 is optional: omit ipv6_network and ipv6_cidr_blocks on an entry to create that subnet as IPv4-only"
   type        = any
   default     = []
 }

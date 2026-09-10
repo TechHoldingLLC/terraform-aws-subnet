@@ -10,7 +10,7 @@ locals {
     for subnet in var.public_subnets : [
       for index, cidr_block in subnet.cidr_blocks : {
         cidr_block        = "${subnet.network}.${cidr_block}"
-        ipv6_cidr_block   = try("${subnet.ipv6_network}${element(subnet.ipv6_cidr_blocks, index)}", null)
+        ipv6_cidr_block   = "${subnet.ipv6_network}${element(subnet.ipv6_cidr_blocks, index)}" # IPv6 is mandatory for public subnets
         availability_zone = element(var.availability_zones, index)
       }
     ]
@@ -103,9 +103,9 @@ resource "aws_subnet" "public_subnet" {
 
   enable_dns64                                   = var.enable_dns64
   ipv6_cidr_block                                = each.value.ipv6_cidr_block
-  assign_ipv6_address_on_creation                = each.value.ipv6_cidr_block != null ? var.assign_ipv6_address_on_creation : false
+  assign_ipv6_address_on_creation                = var.assign_ipv6_address_on_creation
   enable_resource_name_dns_a_record_on_launch    = var.enable_resource_name_dns_a_record_on_launch
-  enable_resource_name_dns_aaaa_record_on_launch = each.value.ipv6_cidr_block != null ? var.enable_resource_name_dns_aaaa_record_on_launch : false
+  enable_resource_name_dns_aaaa_record_on_launch = var.enable_resource_name_dns_aaaa_record_on_launch
 
   map_public_ip_on_launch = lookup(each.value, "map_public_ip_on_launch", true)
   tags = merge(
