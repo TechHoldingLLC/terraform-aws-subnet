@@ -10,7 +10,7 @@ locals {
     for subnet in var.public_subnets : [
       for index, cidr_block in subnet.cidr_blocks : {
         cidr_block        = "${subnet.network}.${cidr_block}"
-        ipv6_cidr_block   = "${subnet.ipv6_network}${element(subnet.ipv6_cidr_blocks, index)}"
+        ipv6_cidr_block   = "${subnet.ipv6_network}${element(subnet.ipv6_cidr_blocks, index)}" # IPv6 is mandatory for public subnets
         availability_zone = element(var.availability_zones, index)
       }
     ]
@@ -20,38 +20,68 @@ locals {
     for subnet in var.private_subnets : [
       for index, cidr_block in subnet.cidr_blocks : {
         cidr_block        = "${subnet.network}.${cidr_block}"
-        ipv6_cidr_block   = "${subnet.ipv6_network}${element(subnet.ipv6_cidr_blocks, index)}"
+        ipv6_cidr_block   = try("${subnet.ipv6_network}${element(subnet.ipv6_cidr_blocks, index)}", null)
         availability_zone = element(var.availability_zones, index)
       }
     ]
   ])
 
-  nacl_ingress = flatten([
-    for idx, rule in var.nacl_ingress : [
-      for index in range(length(rule.cidr_blocks)) : {
-        from_port   = try(lookup(rule, "from_port"), lookup(rule, "port"))
-        to_port     = try(lookup(rule, "to_port"), lookup(rule, "port"))
-        rule_action = lookup(rule, "rule_action", "allow")
-        protocol    = lookup(rule, "protocol", "-1")
-        cidr_block  = tolist(rule.cidr_blocks)[index]
-        rule_number = ((idx + 2) * 100) + index
-        egress      = false
-      }
-    ]
+  nacl_ingress = flatten([                      # flatten = Convert the list of lists into a single list
+    for idx, rule in var.nacl_ingress : concat( # combine the two lists of ingress rules for IPv4 and IPv6 into a single list
+      [
+        for index in range(length(try(rule.cidr_blocks, []))) : {
+          from_port       = try(lookup(rule, "from_port"), lookup(rule, "port"))
+          to_port         = try(lookup(rule, "to_port"), lookup(rule, "port"))
+          rule_action     = lookup(rule, "rule_action", "allow")
+          protocol        = lookup(rule, "protocol", "-1")
+          cidr_block      = tolist(rule.cidr_blocks)[index]
+          ipv6_cidr_block = null
+          rule_number     = ((idx + 2) * 100) + index
+          egress          = false
+        }
+      ],
+      [
+        for index in range(length(try(rule.ipv6_cidr_blocks, []))) : {
+          from_port       = try(lookup(rule, "from_port"), lookup(rule, "port"))
+          to_port         = try(lookup(rule, "to_port"), lookup(rule, "port"))
+          rule_action     = lookup(rule, "rule_action", "allow")
+          protocol        = lookup(rule, "protocol", "-1")
+          cidr_block      = null
+          ipv6_cidr_block = tolist(rule.ipv6_cidr_blocks)[index]
+          rule_number     = ((idx + 2) * 100) + 50 + index
+          egress          = false
+        }
+      ]
+    )
   ])
 
   nacl_egress = flatten([
-    for idx, rule in var.nacl_egress : [
-      for index in range(length(rule.cidr_blocks)) : {
-        from_port   = try(lookup(rule, "from_port"), lookup(rule, "port"))
-        to_port     = try(lookup(rule, "to_port"), lookup(rule, "port"))
-        rule_action = lookup(rule, "rule_action", "allow")
-        protocol    = lookup(rule, "protocol", "-1")
-        cidr_block  = tolist(rule.cidr_blocks)[index]
-        rule_number = ((idx + 2) * 100) + index
-        egress      = true
-      }
-    ]
+    for idx, rule in var.nacl_egress : concat(
+      [
+        for index in range(length(try(rule.cidr_blocks, []))) : {
+          from_port       = try(lookup(rule, "from_port"), lookup(rule, "port"))
+          to_port         = try(lookup(rule, "to_port"), lookup(rule, "port"))
+          rule_action     = lookup(rule, "rule_action", "allow")
+          protocol        = lookup(rule, "protocol", "-1")
+          cidr_block      = tolist(rule.cidr_blocks)[index]
+          ipv6_cidr_block = null
+          rule_number     = ((idx + 2) * 100) + index
+          egress          = true
+        }
+      ],
+      [
+        for index in range(length(try(rule.ipv6_cidr_blocks, []))) : {
+          from_port       = try(lookup(rule, "from_port"), lookup(rule, "port"))
+          to_port         = try(lookup(rule, "to_port"), lookup(rule, "port"))
+          rule_action     = lookup(rule, "rule_action", "allow")
+          protocol        = lookup(rule, "protocol", "-1")
+          cidr_block      = null
+          ipv6_cidr_block = tolist(rule.ipv6_cidr_blocks)[index]
+          rule_number     = ((idx + 2) * 100) + 50 + index
+          egress          = true
+        }
+      ]
+    )
   ])
 
   public_subnet_ids                 = [for subnet in aws_subnet.public_subnet : subnet.id]
@@ -71,11 +101,11 @@ resource "aws_subnet" "public_subnet" {
   cidr_block        = each.value.cidr_block
   availability_zone = each.value.availability_zone
 
-  enable_dns64                                   = var.enable_ipv6 ? var.enable_dns64 : false
-  ipv6_cidr_block                                = var.enable_ipv6 ? each.value.ipv6_cidr_block : null
-  assign_ipv6_address_on_creation                = var.enable_ipv6 ? var.assign_ipv6_address_on_creation : false
-  enable_resource_name_dns_a_record_on_launch    = var.enable_ipv6 ? var.enable_resource_name_dns_a_record_on_launch : false
-  enable_resource_name_dns_aaaa_record_on_launch = var.enable_ipv6 ? var.enable_resource_name_dns_aaaa_record_on_launch : false
+  enable_dns64                                   = var.enable_dns64
+  ipv6_cidr_block                                = each.value.ipv6_cidr_block
+  assign_ipv6_address_on_creation                = var.assign_ipv6_address_on_creation
+  enable_resource_name_dns_a_record_on_launch    = var.enable_resource_name_dns_a_record_on_launch
+  enable_resource_name_dns_aaaa_record_on_launch = var.enable_resource_name_dns_aaaa_record_on_launch
 
   map_public_ip_on_launch = lookup(each.value, "map_public_ip_on_launch", true)
   tags = merge(
@@ -102,11 +132,11 @@ resource "aws_subnet" "private_subnet" {
   cidr_block        = each.value.cidr_block
   availability_zone = each.value.availability_zone
 
-  enable_dns64                                   = var.enable_ipv6 ? var.enable_dns64 : false
-  ipv6_cidr_block                                = var.enable_ipv6 ? each.value.ipv6_cidr_block : null
-  assign_ipv6_address_on_creation                = var.enable_ipv6 ? var.assign_ipv6_address_on_creation : false
-  enable_resource_name_dns_a_record_on_launch    = var.enable_ipv6 ? var.enable_resource_name_dns_a_record_on_launch : false
-  enable_resource_name_dns_aaaa_record_on_launch = var.enable_ipv6 ? var.enable_resource_name_dns_aaaa_record_on_launch : false
+  enable_dns64                                   = var.enable_dns64
+  ipv6_cidr_block                                = each.value.ipv6_cidr_block
+  assign_ipv6_address_on_creation                = each.value.ipv6_cidr_block != null ? var.assign_ipv6_address_on_creation : false
+  enable_resource_name_dns_a_record_on_launch    = var.enable_resource_name_dns_a_record_on_launch
+  enable_resource_name_dns_aaaa_record_on_launch = each.value.ipv6_cidr_block != null ? var.enable_resource_name_dns_aaaa_record_on_launch : false
 
   map_public_ip_on_launch = lookup(each.value, "map_public_ip_on_launch", false)
   tags = merge(
@@ -142,26 +172,28 @@ resource "aws_network_acl_association" "nacl_association" {
 
 ## Network ACL rule for inbound traffic
 resource "aws_network_acl_rule" "ingress_nacl_rule" {
-  for_each       = var.create_acl ? { for index, rule in local.nacl_ingress : "${var.name}-${rule.rule_number}-${rule.egress}" => rule } : {}
-  network_acl_id = aws_network_acl.nacl[0].id
-  rule_number    = lookup(each.value, "rule_number")
-  egress         = lookup(each.value, "egress")
-  protocol       = lookup(each.value, "protocol")
-  rule_action    = lookup(each.value, "rule_action")
-  cidr_block     = lookup(each.value, "cidr_block")
-  from_port      = lookup(each.value, "from_port")
-  to_port        = lookup(each.value, "to_port")
+  for_each        = var.create_acl ? { for index, rule in local.nacl_ingress : "${var.name}-ingress-${index}" => rule } : {}
+  network_acl_id  = aws_network_acl.nacl[0].id
+  rule_number     = lookup(each.value, "rule_number")
+  egress          = lookup(each.value, "egress")
+  protocol        = lookup(each.value, "protocol")
+  rule_action     = lookup(each.value, "rule_action")
+  cidr_block      = lookup(each.value, "cidr_block")
+  ipv6_cidr_block = lookup(each.value, "ipv6_cidr_block")
+  from_port       = lookup(each.value, "from_port")
+  to_port         = lookup(each.value, "to_port")
 }
 
 ## Network ACL rule for outbound traffic
 resource "aws_network_acl_rule" "egress_nacl_rule" {
-  for_each       = var.create_acl ? { for index, rule in local.nacl_egress : "${var.name}-${rule.rule_number}-${rule.egress}" => rule } : {}
-  network_acl_id = aws_network_acl.nacl[0].id
-  rule_number    = lookup(each.value, "rule_number")
-  egress         = lookup(each.value, "egress")
-  protocol       = lookup(each.value, "protocol")
-  rule_action    = lookup(each.value, "rule_action")
-  cidr_block     = lookup(each.value, "cidr_block")
-  from_port      = lookup(each.value, "from_port")
-  to_port        = lookup(each.value, "to_port")
+  for_each        = var.create_acl ? { for index, rule in local.nacl_egress : "${var.name}-egress-${index}" => rule } : {}
+  network_acl_id  = aws_network_acl.nacl[0].id
+  rule_number     = lookup(each.value, "rule_number")
+  egress          = lookup(each.value, "egress")
+  protocol        = lookup(each.value, "protocol")
+  rule_action     = lookup(each.value, "rule_action")
+  cidr_block      = lookup(each.value, "cidr_block")
+  ipv6_cidr_block = lookup(each.value, "ipv6_cidr_block")
+  from_port       = lookup(each.value, "from_port")
+  to_port         = lookup(each.value, "to_port")
 }
