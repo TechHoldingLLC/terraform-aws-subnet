@@ -25,12 +25,6 @@ variable "enable_dns64" {
   default     = false
 }
 
-variable "enable_ipv6" {
-  description = "Specifies whether to enable IPv6"
-  type        = bool
-  default     = false
-}
-
 variable "enable_resource_name_dns_a_record_on_launch" {
   description = "Specifies whether to respond to DNS queries for instance hostnames with DNS A records"
   type        = bool
@@ -69,14 +63,30 @@ variable "private_route_table_ids" {
 
 variable "nacl_ingress" {
   description = "Network ACLs for inbound traffic in Subnets"
-  type        = list(any)
-  default     = []
+  type = list(object({
+    port             = optional(number)
+    from_port        = optional(number)
+    to_port          = optional(number)
+    protocol         = optional(string, "-1")
+    rule_action      = optional(string, "allow")
+    cidr_blocks      = optional(list(string), [])
+    ipv6_cidr_blocks = optional(list(string), [])
+  }))
+  default = []
 }
 
 variable "nacl_egress" {
   description = "Network ACLs for outbound traffic in Subnets"
-  type        = list(any)
-  default     = []
+  type = list(object({
+    port             = optional(number)
+    from_port        = optional(number)
+    to_port          = optional(number)
+    protocol         = optional(string, "-1")
+    rule_action      = optional(string, "allow")
+    cidr_blocks      = optional(list(string), [])
+    ipv6_cidr_blocks = optional(list(string), [])
+  }))
+  default = []
 }
 
 variable "tags" {

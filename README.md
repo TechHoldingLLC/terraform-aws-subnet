@@ -36,7 +36,6 @@ No modules.
 | <a name="input_availability_zones"></a> [availability\_zones](#input\_availability\_zones) | Number of availability zones for subnet deployment | `list(any)` | n/a | yes |
 | <a name="input_create_acl"></a> [create\_acl](#input\_create\_acl) | Create ACL | `bool` | `false` | no |
 | <a name="input_enable_dns64"></a> [enable\_dns64](#input\_enable\_dns64) | Specifies whether to enable DNS64 | `bool` | `false` | no |
-| <a name="input_enable_ipv6"></a> [enable\_ipv6](#input\_enable\_ipv6) | Specifies whether to enable IPv6 | `bool` | `false` | no |
 | <a name="input_enable_resource_name_dns_a_record_on_launch"></a> [enable\_resource\_name\_dns\_a\_record\_on\_launch](#input\_enable\_resource\_name\_dns\_a\_record\_on\_launch) | Specifies whether to respond to DNS queries for instance hostnames with DNS A records | `bool` | `false` | no |
 | <a name="input_enable_resource_name_dns_aaaa_record_on_launch"></a> [enable\_resource\_name\_dns\_aaaa\_record\_on\_launch](#input\_enable\_resource\_name\_dns\_aaaa\_record\_on\_launch) | Specifies whether to respond to DNS queries for instance hostnames with DNS AAAA records | `bool` | `false` | no |
 | <a name="input_nacl_egress"></a> [nacl\_egress](#input\_nacl\_egress) | Network ACLs for outbound traffic in Subnets | `list(any)` | `[]` | no |
